@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "jira-tracker"
+version = "0.0.0"
+description = ""
+authors = ["TrisNol <contact@trisnol.dev>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "jira_tracker"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+ttkbootstrap = "^1.12.2"
+atlassian-python-api = "^4.0.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
