@@ -82,19 +82,11 @@ class DashboardPage(ttk.Frame):
                 ticket_url = f"{jira.url}/browse/{ticket_key}"
                 webbrowser.open(ticket_url)
 
-        # Create a link icon button to open the ticket
-        link_icon_image = Image.open(
-            "assets/link-icon.png"
-        )  # Replace with the actual path to your icon
-        link_icon_image = link_icon_image.resize((16, 16))
-        link_icon_photo = ImageTk.PhotoImage(link_icon_image)  # Convert to PhotoImage
-        link_button = ttk.Button(
-            ticket_frame, image=link_icon_photo, command=open_ticket, bootstyle="link"
+        # Create a button with the text "Open" to open the ticket
+        open_button = ttk.Button(
+            ticket_frame, text="Open", command=open_ticket, bootstyle="link"
         )
-        link_button.image = (
-            link_icon_photo  # Keep a reference to avoid garbage collection
-        )
-        link_button.pack(side=LEFT, padx=5)
+        open_button.pack(side=LEFT, padx=5)
 
         # Timer input field and play/pause button
         timer_var = ttk.StringVar(value="00:00:00")  # Default timer value

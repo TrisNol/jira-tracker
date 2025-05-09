@@ -8,9 +8,10 @@ readme = "README.md"
 packages = [{include = "jira_tracker"}]
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.12,<3.14"
 ttkbootstrap = "^1.12.2"
 atlassian-python-api = "^4.0.3"
+pyinstaller = "^6.13.0"
 
 
 [build-system]
