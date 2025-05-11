@@ -32,8 +32,8 @@ class DashboardPage(ttk.Frame):
             return
 
         # Fetch user information
-        user_display_name = jira.myself()["displayName"]
-        avatar_url = jira.myself()["avatarUrls"]["48x48"]
+        user_display_name = user["displayName"]
+        avatar_url = user["avatarUrls"]["48x48"]
 
         # Display the user's display name
         ttk.Label(top_right_frame, text=user_display_name, bootstyle="success").pack(
