@@ -2,9 +2,6 @@ import ttkbootstrap as ttk
 import requests
 import webbrowser
 
-from ttkbootstrap.constants import *
-from ttkbootstrap.icons import Icon
-
 from atlassian import Jira
 from PIL import Image, ImageTk
 from io import BytesIO
@@ -12,7 +9,6 @@ from datetime import datetime, timezone
 
 
 class DashboardPage(ttk.Frame):
-
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -25,7 +21,9 @@ class DashboardPage(ttk.Frame):
 
         # Create a frame for the top-right corner
         top_right_frame = ttk.Frame(self)
-        top_right_frame.pack(side=TOP, anchor=E, pady=10, padx=10)
+        top_right_frame.pack(
+            side=ttk.constants.TOP, anchor=ttk.constants.E, pady=10, padx=10
+        )
 
         # Should not happen but just to be safe
         if not jira:
@@ -37,7 +35,7 @@ class DashboardPage(ttk.Frame):
 
         # Display the user's display name
         ttk.Label(top_right_frame, text=user_display_name, bootstyle="success").pack(
-            side=LEFT, padx=5
+            side=ttk.constants.LEFT, padx=5
         )
 
         # Fetch and display the avatar
@@ -51,7 +49,7 @@ class DashboardPage(ttk.Frame):
         avatar_label.image = (
             avatar_photo  # Keep a reference to avoid garbage collection
         )
-        avatar_label.pack(side=LEFT, padx=5)
+        avatar_label.pack(side=ttk.constants.LEFT, padx=5)
 
         # Fetch a list of tickets assigned to the user
         issues = jira.jql("assignee = currentUser() AND resolution = Unresolved")[
@@ -61,11 +59,13 @@ class DashboardPage(ttk.Frame):
 
         # Create a frame for the ticket selection
         ticket_frame = ttk.Frame(self)
-        ticket_frame.pack(side=TOP, fill=X, pady=10, padx=10)
+        ticket_frame.pack(
+            side=ttk.constants.TOP, fill=ttk.constants.X, pady=10, padx=10
+        )
 
         # Label for ticket selection
         ttk.Label(ticket_frame, text="Select or Enter Ticket:", bootstyle="info").pack(
-            side=LEFT, padx=5
+            side=ttk.constants.LEFT, padx=5
         )
 
         # Combobox for ticket selection with editable entry
@@ -73,12 +73,11 @@ class DashboardPage(ttk.Frame):
         ticket_combobox = ttk.Combobox(
             ticket_frame, textvariable=ticket_var, values=ticket_options
         )
-        ticket_combobox.pack(side=LEFT, padx=5)
+        ticket_combobox.pack(side=ttk.constants.LEFT, padx=5)
 
         # Button to open the selected ticket in a browser
         def open_ticket():
-            ticket_key = ticket_var.get()
-            if ticket_key:
+            if ticket_key := ticket_var.get():
                 ticket_url = f"{jira.url}/browse/{ticket_key}"
                 webbrowser.open(ticket_url)
 
@@ -86,14 +85,14 @@ class DashboardPage(ttk.Frame):
         open_button = ttk.Button(
             ticket_frame, text="Open", command=open_ticket, bootstyle="link"
         )
-        open_button.pack(side=LEFT, padx=5)
+        open_button.pack(side=ttk.constants.LEFT, padx=5)
 
         # Timer input field and play/pause button
         timer_var = ttk.StringVar(value="00:00:00")  # Default timer value
         timer_entry = ttk.Entry(
-            ticket_frame, textvariable=timer_var, width=10, justify=CENTER
+            ticket_frame, textvariable=timer_var, width=10, justify=ttk.constants.CENTER
         )
-        timer_entry.pack(side=LEFT, padx=5)
+        timer_entry.pack(side=ttk.constants.LEFT, padx=5)
 
         # Timer state
         timer_running = [
@@ -135,16 +134,18 @@ class DashboardPage(ttk.Frame):
         reset_button = ttk.Button(
             ticket_frame, text="Reset", command=reset_timer, bootstyle="danger"
         )
-        reset_button.pack(side=LEFT, padx=5)
+        reset_button.pack(side=ttk.constants.LEFT, padx=5)
 
         # Play/Pause button
         play_pause_button = ttk.Button(
             ticket_frame, text="Play", command=toggle_timer, bootstyle="primary"
         )
-        play_pause_button.pack(side=LEFT, padx=5)
+        play_pause_button.pack(side=ttk.constants.LEFT, padx=5)
 
         # Separator
-        ttk.Separator(self, orient=HORIZONTAL).pack(fill=X, pady=10)
+        ttk.Separator(self, orient=ttk.constants.HORIZONTAL).pack(
+            fill=ttk.constants.X, pady=10
+        )
 
         # Work package selection
         work_package_var = ttk.StringVar(value="Coding")  # Default work package
@@ -152,11 +153,11 @@ class DashboardPage(ttk.Frame):
 
         # Frame for work package selection
         work_package_frame = ttk.Frame(self)
-        work_package_frame.pack(side=TOP, pady=5)
+        work_package_frame.pack(side=ttk.constants.TOP, pady=5)
 
         # Label for work package selection
         ttk.Label(work_package_frame, text="Work Package:", bootstyle="info").pack(
-            side=LEFT, padx=5
+            side=ttk.constants.LEFT, padx=5
         )
 
         # Dropdown for work package selection
@@ -165,7 +166,7 @@ class DashboardPage(ttk.Frame):
             textvariable=work_package_var,
             values=work_package_options,
         )
-        work_package_combobox.pack(side=LEFT, padx=5)
+        work_package_combobox.pack(side=ttk.constants.LEFT, padx=5)
 
         # Transfer button
         def transfer_ticket():
@@ -191,4 +192,4 @@ class DashboardPage(ttk.Frame):
         transfer_button = ttk.Button(
             self, text="Transfer", command=transfer_ticket, bootstyle="success"
         )
-        transfer_button.pack(side=TOP, pady=10)
+        transfer_button.pack(side=ttk.constants.TOP, pady=10)

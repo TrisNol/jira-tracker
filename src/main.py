@@ -1,7 +1,6 @@
 import ttkbootstrap as ttk
-from ttkbootstrap.constants import *
+
 from pages.login import LoginPage
-from pages.dashboard import DashboardPage
 
 
 class MainApp(ttk.Window):
@@ -12,7 +11,7 @@ class MainApp(ttk.Window):
 
         # Container for pages
         self.container = ttk.Frame(self)
-        self.container.pack(fill=BOTH, expand=True)
+        self.container.pack(fill=ttk.constants.BOTH, expand=True)
 
         # Dictionary to hold pages
         self.pages = {}
@@ -32,7 +31,7 @@ class MainApp(ttk.Window):
         if page_class not in self.pages:
             self.pages[page_class] = page_class(self.container, self)
         page = self.pages[page_class]
-        page.pack(fill=BOTH, expand=True)
+        page.pack(fill=ttk.constants.BOTH, expand=True)
 
 
 if __name__ == "__main__":
