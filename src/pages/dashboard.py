@@ -124,14 +124,6 @@ class DashboardPage(ttk.Frame):
                 timer_started[0] = datetime.now(timezone.utc)
                 update_timer()
 
-        # def toggle_timer():
-        #     timer_running[0] = not timer_running[0]
-        #     if timer_running[0]:
-        #         play_pause_button.configure(text="Pause")
-        #         update_timer()
-        #     else:
-        #         play_pause_button.configure(text="Play")
-
         def reset_timer():
             timer_running[0] = False
             timer_seconds[0] = 0
@@ -154,22 +146,47 @@ class DashboardPage(ttk.Frame):
         # Separator
         ttk.Separator(self, orient=HORIZONTAL).pack(fill=X, pady=10)
 
+        # Work package selection
+        work_package_var = ttk.StringVar(value="Coding")  # Default work package
+        work_package_options = ["Coding", "Concept", "Meeting", "PR Review", "Testing"]
+
+        # Frame for work package selection
+        work_package_frame = ttk.Frame(self)
+        work_package_frame.pack(side=TOP, pady=5)
+
+        # Label for work package selection
+        ttk.Label(work_package_frame, text="Work Package:", bootstyle="info").pack(
+            side=LEFT, padx=5
+        )
+
+        # Dropdown for work package selection
+        work_package_combobox = ttk.Combobox(
+            work_package_frame,
+            textvariable=work_package_var,
+            values=work_package_options,
+        )
+        work_package_combobox.pack(side=LEFT, padx=5)
+
         # Transfer button
         def transfer_ticket():
             ticket_key = ticket_var.get()
             tracked_time = timer_var.get()
-            print(f"Ticket: {ticket_key}, Time Tracked: {tracked_time}")
+            selected_work_package = work_package_var.get()
+            print(
+                f"Ticket: {ticket_key}, Time Tracked: {tracked_time}, Work Package: {selected_work_package}"
+            )
 
             ticket = jira.issue(ticket_key)
             print(ticket)
 
             worklog_entry = {
-                'started': timer_started[0].strftime('%Y-%m-%dT%H:%M:%S.000%z'),
-                'timeSpentSeconds': timer_seconds[0],
-                'comment': 'Time tracked Hello',
+                "started": timer_started[0].strftime("%Y-%m-%dT%H:%M:%S.000%z"),
+                "timeSpentSeconds": timer_seconds[0],
+                "comment": selected_work_package,
             }
             print(worklog_entry)
             jira.issue_add_json_worklog(key=ticket_key, worklog=worklog_entry)
+            reset_timer()
 
         transfer_button = ttk.Button(
             self, text="Transfer", command=transfer_ticket, bootstyle="success"
