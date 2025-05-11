@@ -7,7 +7,7 @@ authors = ["TrisNol <contact@trisnol.dev>"]
 description = ""
 license = "MIT"
 name = "jira-tracker"
-packages = [{include = "jira_tracker"}]
+packages = [{include = "src"}]
 readme = "README.md"
 version = "0.0.0"
 
