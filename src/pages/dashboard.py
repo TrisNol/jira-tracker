@@ -57,44 +57,7 @@ class DashboardPage(ttk.Frame):
         ]
         ticket_options = [issue["key"] for issue in issues]
 
-        # Create a frame for the ticket selection
-        ticket_frame = ttk.Frame(self)
-        ticket_frame.pack(
-            side=ttk.constants.TOP, fill=ttk.constants.X, pady=10, padx=10
-        )
-
-        # Label for ticket selection
-        ttk.Label(ticket_frame, text="Select or Enter Ticket:", bootstyle="info").pack(
-            side=ttk.constants.LEFT, padx=5
-        )
-
-        # Combobox for ticket selection with editable entry
-        ticket_var = ttk.StringVar()
-        ticket_combobox = ttk.Combobox(
-            ticket_frame, textvariable=ticket_var, values=ticket_options
-        )
-        ticket_combobox.pack(side=ttk.constants.LEFT, padx=5)
-
-        # Button to open the selected ticket in a browser
-        def open_ticket():
-            if ticket_key := ticket_var.get():
-                ticket_url = f"{jira.url}/browse/{ticket_key}"
-                webbrowser.open(ticket_url)
-
-        # Create a button with the text "Open" to open the ticket
-        open_button = ttk.Button(
-            ticket_frame, text="Open", command=open_ticket, bootstyle="link"
-        )
-        open_button.pack(side=ttk.constants.LEFT, padx=5)
-
-        # Timer input field and play/pause button
-        timer_var = ttk.StringVar(value="00:00:00")  # Default timer value
-        timer_entry = ttk.Entry(
-            ticket_frame, textvariable=timer_var, width=10, justify=ttk.constants.CENTER
-        )
-        timer_entry.pack(side=ttk.constants.LEFT, padx=5)
-
-        # Timer state
+        # Timer state - shared across all rows
         timer_running = [
             False
         ]  # Use a mutable object to allow modification in nested functions
@@ -102,94 +65,155 @@ class DashboardPage(ttk.Frame):
         timer_job = [None]  # Store the after job ID
         timer_started = [None]  # Store the start time
 
-        def update_timer():
-            if timer_running[0]:
-                timer_seconds[0] += 1
-                hours, remainder = divmod(timer_seconds[0], 3600)
-                minutes, seconds = divmod(remainder, 60)
-                timer_var.set(f"{hours:02}:{minutes:02}:{seconds:02}")
-                timer_job[0] = self.after(1000, update_timer)
-
-        def toggle_timer():
-            if timer_running[0]:
-                timer_running[0] = False
-                if timer_job[0] is not None:
-                    self.after_cancel(timer_job[0])
-                    timer_job[0] = None
-                play_pause_button.configure(text="Play")
-            else:
-                timer_running[0] = True
-                play_pause_button.configure(text="Pause")
-                timer_started[0] = datetime.now(timezone.utc)
-                update_timer()
-
-        def reset_timer():
-            timer_running[0] = False
-            timer_seconds[0] = 0
-            timer_started[0] = None
-            timer_var.set("00:00:00")
-            play_pause_button.configure(text="Play")
-
-        # Reset button
-        reset_button = ttk.Button(
-            ticket_frame, text="Reset", command=reset_timer, bootstyle="danger"
-        )
-        reset_button.pack(side=ttk.constants.LEFT, padx=5)
-
-        # Play/Pause button
-        play_pause_button = ttk.Button(
-            ticket_frame, text="Play", command=toggle_timer, bootstyle="primary"
-        )
-        play_pause_button.pack(side=ttk.constants.LEFT, padx=5)
-
-        # Separator
-        ttk.Separator(self, orient=ttk.constants.HORIZONTAL).pack(
-            fill=ttk.constants.X, pady=10
-        )
-
-        # Work package selection
-        work_package_var = ttk.StringVar(value="Coding")  # Default work package
+        # Work package options - shared across all rows
         work_package_options = ["Coding", "Concept", "Meeting", "PR Review", "Testing"]
 
-        # Frame for work package selection
-        work_package_frame = ttk.Frame(self)
-        work_package_frame.pack(side=ttk.constants.TOP, pady=5)
+        # Define functions that will be shared
+        def update_timer(timer_var, row_index):
+            if timer_running[row_index]:
+                timer_seconds[row_index] += 1
+                hours, remainder = divmod(timer_seconds[row_index], 3600)
+                minutes, seconds = divmod(remainder, 60)
+                timer_var.set(f"{hours:02}:{minutes:02}:{seconds:02}")
+                timer_job[row_index] = self.after(
+                    1000, lambda: update_timer(timer_var, row_index)
+                )
 
-        # Label for work package selection
-        ttk.Label(work_package_frame, text="Work Package:", bootstyle="info").pack(
-            side=ttk.constants.LEFT, padx=5
-        )
-
-        # Dropdown for work package selection
-        work_package_combobox = ttk.Combobox(
-            work_package_frame,
-            textvariable=work_package_var,
-            values=work_package_options,
-        )
-        work_package_combobox.pack(side=ttk.constants.LEFT, padx=5)
-
-        # Transfer button
-        def transfer_ticket():
-            ticket_key = ticket_var.get()
-            tracked_time = timer_var.get()
-            selected_work_package = work_package_var.get()
-            print(
-                f"Ticket: {ticket_key}, Time Tracked: {tracked_time}, Work Package: {selected_work_package}"
+        def create_row(row_index):
+            # Create a frame for the ticket row
+            ticket_frame = ttk.Frame(self)
+            ticket_frame.pack(
+                side=ttk.constants.TOP, fill=ttk.constants.X, pady=10, padx=10
             )
 
-            ticket = jira.issue(ticket_key)
-            print(ticket)
+            # Expand the arrays to accommodate the new row
+            if len(timer_running) <= row_index:
+                timer_running.append(False)
+                timer_seconds.append(0)
+                timer_job.append(None)
+                timer_started.append(None)
 
-            worklog_entry = {
-                "started": timer_started[0].strftime("%Y-%m-%dT%H:%M:%S.000%z"),
-                "timeSpentSeconds": timer_seconds[0],
-                "comment": selected_work_package,
-            }
-            print(worklog_entry)
-            jira.issue_add_json_worklog(key=ticket_key, worklog=worklog_entry)
-            reset_timer()
+            # Label for ticket selection
+            ttk.Label(
+                ticket_frame, text=f"Ticket {row_index+1}:", bootstyle="info"
+            ).pack(side=ttk.constants.LEFT, padx=5)
 
-        transfer_button = ttk.Button(
-            self, text="Transfer", command=transfer_ticket, bootstyle="success"
-        )
-        transfer_button.pack(side=ttk.constants.TOP, pady=10)
+            # Combobox for ticket selection with editable entry
+            ticket_var = ttk.StringVar()
+            ticket_combobox = ttk.Combobox(
+                ticket_frame, textvariable=ticket_var, values=ticket_options
+            )
+            ticket_combobox.pack(side=ttk.constants.LEFT, padx=5)
+
+            # Button to open the selected ticket in a browser
+            def open_ticket():
+                if ticket_key := ticket_var.get():
+                    ticket_url = f"{jira.url}/browse/{ticket_key}"
+                    webbrowser.open(ticket_url)
+
+            # Create a button with the text "Open" to open the ticket
+            open_button = ttk.Button(
+                ticket_frame, text="Open", command=open_ticket, bootstyle="link"
+            )
+            open_button.pack(side=ttk.constants.LEFT, padx=5)
+
+            # Timer input field and play/pause button
+            timer_var = ttk.StringVar(value="00:00:00")  # Default timer value
+            timer_entry = ttk.Entry(
+                ticket_frame,
+                textvariable=timer_var,
+                width=10,
+                justify=ttk.constants.CENTER,
+            )
+            timer_entry.pack(side=ttk.constants.LEFT, padx=5)
+
+            def toggle_timer():
+                if timer_running[row_index]:
+                    timer_running[row_index] = False
+                    if timer_job[row_index] is not None:
+                        self.after_cancel(timer_job[row_index])
+                        timer_job[row_index] = None
+                    play_pause_button.configure(text="Play")
+                else:
+                    timer_running[row_index] = True
+                    play_pause_button.configure(text="Pause")
+                    timer_started[row_index] = datetime.now(timezone.utc)
+                    update_timer(timer_var, row_index)
+
+            def reset_timer():
+                timer_running[row_index] = False
+                timer_seconds[row_index] = 0
+                timer_started[row_index] = None
+                timer_var.set("00:00:00")
+                play_pause_button.configure(text="Play")
+
+            # Reset button
+            reset_button = ttk.Button(
+                ticket_frame, text="Reset", command=reset_timer, bootstyle="danger"
+            )
+            reset_button.pack(side=ttk.constants.LEFT, padx=5)
+
+            # Play/Pause button
+            play_pause_button = ttk.Button(
+                ticket_frame, text="Play", command=toggle_timer, bootstyle="primary"
+            )
+            play_pause_button.pack(side=ttk.constants.LEFT, padx=5)
+
+            # Work package selection
+            work_package_var = ttk.StringVar(value="Coding")  # Default work package
+
+            # Label for work package selection
+            ttk.Label(ticket_frame, text="Work Package:", bootstyle="info").pack(
+                side=ttk.constants.LEFT, padx=5
+            )
+
+            # Dropdown for work package selection
+            work_package_combobox = ttk.Combobox(
+                ticket_frame,
+                textvariable=work_package_var,
+                values=work_package_options,
+            )
+            work_package_combobox.pack(side=ttk.constants.LEFT, padx=5)
+
+            # Transfer button
+            def transfer_ticket():
+                ticket_key = ticket_var.get()
+                tracked_time = timer_var.get()
+                selected_work_package = work_package_var.get()
+                print(
+                    f"Row {row_index+1} - Ticket: {ticket_key}, Time Tracked: {tracked_time}, Work Package: {selected_work_package}"
+                )
+
+                if ticket_key:
+                    ticket = jira.issue(ticket_key)
+                    print(ticket)
+
+                    worklog_entry = {
+                        "started": timer_started[row_index].strftime(
+                            "%Y-%m-%dT%H:%M:%S.000%z"
+                        ),
+                        "timeSpentSeconds": timer_seconds[row_index],
+                        "comment": selected_work_package,
+                    }
+                    print(worklog_entry)
+                    jira.issue_add_json_worklog(key=ticket_key, worklog=worklog_entry)
+                    reset_timer()
+
+            transfer_button = ttk.Button(
+                ticket_frame,
+                text="Transfer",
+                command=transfer_ticket,
+                bootstyle="success",
+            )
+            transfer_button.pack(side=ttk.constants.LEFT, padx=5)
+
+            return ticket_frame
+
+        # Create 5 rows
+        for i in range(5):
+            create_row(i)
+            # Add a separator after each row except the last one
+            if i < 4:
+                ttk.Separator(self, orient=ttk.constants.HORIZONTAL).pack(
+                    fill=ttk.constants.X, pady=5
+                )
