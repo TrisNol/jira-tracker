@@ -1,5 +1,6 @@
 import ttkbootstrap as ttk
-import importlib
+from pages.login import Login
+from pages.dashboard import Dashboard
 
 
 class MainApp(ttk.Window):
@@ -16,27 +17,13 @@ class MainApp(ttk.Window):
         self.pages = {}
 
         # Map page names to their class references
-        self.page_registry = {}
+        self.page_registry = {"Login": Login, "Dashboard": Dashboard}
 
         # Shared instances of Jira
         self.jira_instance = None
 
         # Initialize pages
-        # Load the LoginPage without importing it at the module level
         self.show_page("Login")
-
-    def register_page(self, page_name, page_class):
-        """Register a page class with its name"""
-        self.page_registry[page_name] = page_class
-
-    def get_page_class(self, page_name):
-        """Get a page class by name, importing it if necessary"""
-        if page_name not in self.page_registry:
-            # Dynamically import the page class
-            module = importlib.import_module(f"pages.{page_name.lower()}")
-            page_class = getattr(module, page_name)
-            self.page_registry[page_name] = page_class
-        return self.page_registry[page_name]
 
     def show_page(self, page_name_or_class):
         # Remove current page if it exists
@@ -45,7 +32,9 @@ class MainApp(ttk.Window):
 
         # Convert page name to class if it's a string
         if isinstance(page_name_or_class, str):
-            page_class = self.get_page_class(page_name_or_class)
+            if page_name_or_class not in self.page_registry:
+                raise ValueError(f"Unknown page name: {page_name_or_class}")
+            page_class = self.page_registry[page_name_or_class]
         else:
             page_class = page_name_or_class
 
