@@ -20,5 +20,5 @@ The app can store your Jira credentials securely in your AppData/Roaming folder:
 ## Building the app
 
 ```
-poetry run pyinstaller --onefile --noconsole .\src\main.py
+poetry run pyinstaller --onefile --noconsole .\src\main.py --name JiraTracker --manifest manifest.xml --version-file version.info
 ```

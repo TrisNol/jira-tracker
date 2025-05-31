@@ -29,7 +29,7 @@ jobs:
       run: poetry install --no-interaction
 
     - name: Build executable
-      run: poetry run pyinstaller --onefile --noconsole ./src/main.py
+      run: poetry run pyinstaller --onefile --noconsole ./src/main.py --name JiraTracker --manifest manifest.xml --version-file version.info
 
     - name: Upload executable
       uses: actions/upload-artifact@v4.6.2
