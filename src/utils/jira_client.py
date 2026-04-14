@@ -34,7 +34,9 @@ class JiraClient:
         if limit is not None:
             params["maxResults"] = int(limit)
         if fields is not None:
-            params["fields"] = ",".join(fields) if isinstance(fields, (list, tuple, set)) else fields
+            params["fields"] = (
+                ",".join(fields) if isinstance(fields, (list, tuple, set)) else fields
+            )
         if expand is not None:
             params["expand"] = expand
         if validate_query is not None:
