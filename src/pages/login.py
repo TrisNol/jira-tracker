@@ -2,8 +2,8 @@ import re
 import ttkbootstrap as ttk
 
 from ttkbootstrap.validation import ValidationEvent, validator, add_validation
-from atlassian import Jira
 from utils.credentials import CredentialManager
+from utils.jira_client import JiraClient
 
 # We'll use string references to avoid circular imports
 
@@ -132,8 +132,8 @@ class Login(ttk.Frame):
         token = self.token_entry.get()
 
         try:
-            # Create Jira and Confluence instances
-            jira = Jira(url=url, username=username, password=token)
+            # Create wrapped Jira client
+            jira = JiraClient(url=url, username=username, password=token)
 
             # Test the connection
             user = jira.myself()

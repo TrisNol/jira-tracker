@@ -1,11 +1,11 @@
 import ttkbootstrap as ttk
 import requests
 
-from atlassian import Jira
 from PIL import Image, ImageTk
 from io import BytesIO
 from components.ticket_row import TicketRow
 from utils.credentials import CredentialManager
+from utils.jira_client import JiraClient
 
 # We'll use string references to avoid circular imports
 
@@ -17,7 +17,7 @@ class Dashboard(ttk.Frame):
         self.credential_manager = CredentialManager()
 
         # Access shared Jira instance
-        jira: Jira = self.controller.jira_instance
+        jira: JiraClient = self.controller.jira_instance
 
         # Create a frame for the top bar
         top_bar_frame = ttk.Frame(self)
@@ -76,7 +76,6 @@ class Dashboard(ttk.Frame):
         )
         avatar_label.pack(side=ttk.constants.LEFT, padx=5)
 
-        # Fetch a list of tickets assigned to the user
         issues = jira.jql("assignee = currentUser() AND resolution = Unresolved")[
             "issues"
         ]
