@@ -24,4 +24,4 @@ pre-commit = "^4.2.0"
 optional = true
 
 [tool.poetry.group.docs.dependencies]
-zensical = ">=0.0.68,<0.0.69"
+zensical = ">=0.0.69,<0.0.70"
